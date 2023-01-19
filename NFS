@@ -1,0 +1,150 @@
+=========== redhat===============
+
+su 
+
+root password 
+
+usermod -aG wheel smarts
+yum install nfs-utils -y
+
+yum install nfs-utils
+mkdir -p  /apps/nfsshare
+chmod -R 755  /apps/nfsshare
+chown nfsnobody:nfsnobody /apps/nfsshare
+
+
+systemctl enable rpcbind
+systemctl enable nfs-server
+systemctl enable nfs-lock
+systemctl enable nfs-idmap
+sudo systemctl restart rpcbind
+sudo systemctl restart nfs-server
+sudo systemctl restart nfs-lock
+sudo systemctl restart nfs-idmap 
+
+cat /proc/filesystems
+
+sudo systemctl stop rpcbind
+sudo systemctl stop nfs-server
+sudo systemctl stop nfs-lock
+sudo systemctl stop nfs-idmap
+
+vi /etc/exports 
+/apps/nfsshare   10.11.135.46/24 (rw,sync,no_root_squash,no_all_squash)
+/apps/nfsshare   10.50.120.117/24(rw,sync,no_root_squash,no_all_squash)
+/apps/nfsshare	 10.36.79.171/29 (rw,sync,no_root_squash,no_all_squash)
+
+systemctl restart nfs-server 
+
+systemctl start firewalld 
+firewall-cmd --permanent --zone=public --add-service=nfs 
+firewall-cmd --permanent --zone=public --add-service=mountd
+firewall-cmd --permanent --zone=public --add-service=rpc-bind 
+firewall-cmd --permanent --zone=public --add-port=61149/tcp
+firewall-cmd --permanent --add-source=10.50.120.116
+firewall-cmd --permanent --add-source=10.50.120.117
+firewall-cmd --permanent --add-source=10.50.120.118
+firewall-cmd --permanent --add-source=10.50.120.119
+firewall-cmd --permanent --add-source=10.50.120.110
+firewall-cmd --permanent --add-source=10.50.120.127
+
+showmount –e 10.50.120.100
+
+mount -t nfs <Server>:<path> <Clien_path>
+netstat -ltu
+
+in Ubuntu
+=============
+
+export http_proxy=http://cloudproxy-d.nat.bt.com:8080
+export https_proxy=http://cloudproxy-d.nat.bt.com:8080
+
+sudo apt update
+
+sudo apt install nfs-kernel-server
+wget http://ftp.de.debian.org/debian/pool/main/n/nfs-utils/nfs-kernel-server_1.3.4-6_amd64.deb
+
+dpkg -i libtirpc-common_1.3.1-1_all.deb
+dpkg -i libtirpc3_1.3.1-1_amd64.deb
+dpkg -i libnfsidmap2_0.25-6_amd64.deb
+dpkg -i rpcbind_1.2.5-9_amd64.deb
+dpkg -i libkeyutils1_1.6.1-2_amd64.deb
+dpkg -i keyutils_1.6.1-2_amd64.deb
+dpkg -i nfs-common_1.3.4-6_amd64.deb
+dpkg -i libtirpc3_1.3.1-1_amd64.deb
+dpkg -i  nfs-kernel-server_1.3.4-6_amd64.deb
+
+Create an NFS Export Directory
+sudo mkdir -p /apps/nfsshare
+sudo chown -R nobody:nogroup /apps/nfsshare
+sudo chmod 777 /apps/nfsshare
+
+
+service rpcbind start
+chkconfig rpcbind on
+service nfs start
+chkconfig nfs on
+
+
+# service rpcbind start
+# service nfs start
+# service nfslock start
+# chkconfig rpcbind on
+# chkconfig nfs on
+# chkconfig nfslock on
+
+sudo chown -R nobody:nogroup /mnt/nfs_share/ 
+
+
+Grant NFS Share Access to Client Systems
+sudo vi /etc/exports
+
+
+/mnt/nfs_share  client_IP_1 (rw,sync,no_subtree_check,no_root_squash,no_all_squash)
+/mnt/nfs_share  client_IP_2 (rw,sync,no_subtree_check,no_root_squash,no_all_squash)
+/mnt/nfs_share  192.168.43.0/24(rw,sync,no_subtree_check)
+
+/apps/nfsshare 10.50.139.116(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.117(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.118(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.119(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.120(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.121(rw,sync,no_root_squash)
+/apps/nfsshare 10.50.139.122(rw,sync,no_root_squash)
+
+sudo chown nfsnobody:nfsnobody /apps/nfsshare
+
+
+Explanation about the options used in the above command.
+
+rw: Stands for Read/Write.
+sync: Requires changes to be written to the disk before they are applied.
+No_subtree_check: Eliminates subtree checking.
+
+Export the NFS Share Directory
+
+sudo exportfs -a
+
+sudo systemctl restart nfs-kernel-server
+
+
+sudo ufw allow from 192.168.43.0/24 to any port nfs
+sudo ufw enable
+sudo ufw status
+
+Client
+======
+
+sudo apt install nfs-common
+
+sudo mkdir -p /mnt/nfs_clientshare
+
+sudo mount 10.2.118.112:/nfsshare/postgres-nfs  /mnt/data
+
+https://www.tecmint.com/install-nfs-server-on-ubuntu/
+
+RHEL
+
+sudo yum install nfs-utils
+yum install cifs-utils
+
